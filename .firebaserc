@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "duty-calc-afeb7",
+    "duty-calc": "duty-calc-afeb7"
+  },
+  "targets": {},
+  "etags": {}
+}

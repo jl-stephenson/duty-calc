@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": [
+    "src",
+    "app/dashboard/layout.tsx",
+    "app/dashboard/account-details/page.tsx",
+    "app/dashboard/analytics/page.tsx",
+    "app/dashboard/resources/page.tsx",
+    "app/dashboard/return/page.tsx",
+    "components",
+    "app/ui/link-button.tsx",
+    "app/ui/card.tsx"
+  ]
+}
