@@ -1,4 +1,4 @@
-# React + TypeScript + Vite
+# DutyCalc
 
 An application that calculates wine and cider duty due for a user and inputs the values to a downloadable PDF.
 
@@ -8,7 +8,3 @@ An application that calculates wine and cider duty due for a user and inputs the
 - Python;
 - pypdf Python library;
 - Firebase (Storage and Functions).
-
-```
-
-```
