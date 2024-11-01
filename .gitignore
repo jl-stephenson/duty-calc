@@ -38,3 +38,5 @@ functions/bin/
 functions/lib64
 functions/share/
 functions/__pycache__/
+
+path.py
