@@ -1,0 +1,32 @@
+duty_rates:
+  wine:
+    standard:
+      very_low:
+        code: "313"
+        description: "Wine less than 3.5% ABV"
+        rate_per_litre_alcohol: 9.27
+        min_abv: 1.2
+        max_abv: 3.4
+
+      low:
+        code: "323"
+        description: "Wine at least 3.5% ABV but less than 8.5% ABV"
+        rate_per_litre_alcohol: 24.77
+        min_abv: 3.5
+        max_abv: 8.49
+
+      medium:
+        code: "333"
+        description: "Wine at least 8.5% ABV but not exceeding 22% ABV"
+        rate_per_litre_alcohol: 28.50
+        min_abv: 8.5
+        max_abv: 22.0
+
+      high:
+        code: "343"
+        description: "Wine exceeding 22% ABV"
+        rate_per_litre_alcohol: 31.64
+        min_abv: 22.1
+        max_abv: 40.0
+
+        
