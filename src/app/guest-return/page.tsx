@@ -4,25 +4,28 @@ import {
   FormData,
   ProcessPDFResponse,
 } from "../../lib/types/guest-return-form";
-import { validateStep } from "../../lib/utils/guest-form-validation";
+import {
+  validateFormStep,
+  validateAllSteps,
+} from "../../lib/utils/guest-form-validation";
 import { TradingDetailsStep } from "./form-steps/TradingDetailsStep";
-import { PeriodDetailsStep } from "./form-steps/PeriodDetailsStep";
-import { PersonalDetailsStep } from "./form-steps/PersonalDetailsStep";
 import { httpsCallable } from "firebase/functions";
 import { PDFPreview } from "./form-steps/PDFPreview";
-import Card from "../../ui/card";
 import { getFirebaseFunctions } from "../../lib/firebase/clientApp";
+import { DutyDetailsStep } from "./form-steps/DutyDetailsStep";
 
 const INITIAL_FORM_DATA: FormData = {
   tradingName: "",
   tradingAddress0: "",
   tradingAddress1: "",
+  tradingAddress2: "",
   postcode: "",
   periodFrom: "",
   periodTo: "",
   urn: "",
   fullName: "",
   capacity: "",
+  wineEntries: [],
 };
 
 export default function Page() {
@@ -33,26 +36,38 @@ export default function Page() {
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>(
+    {}
+  );
 
-  const handleInputChange = (name: keyof FormData, value: string) => {
+  const handleInputChange = (name: keyof FormData, value: unknown) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const validateAllSteps = (): boolean => {
-    // Validate all steps from 1 to 3
-    for (let step = 1; step <= 3; step++) {
-      if (!validateStep(step, formData)) {
-        setError(
-          `Validation failed for step ${step}. Please check all fields are filled correctly.`
-        );
-        setCurrentStep(step); // Optionally return to the invalid step
-        return false;
-      }
+  const validateStep = (step: number): boolean => {
+    const stepErrors = validateFormStep(step, formData);
+    setErrors(stepErrors);
+    return Object.keys(stepErrors).length === 0;
+  };
+
+  const validateAll = (): boolean => {
+    const allErrors = validateAllSteps(formData);
+    if (Object.keys(allErrors).length > 0) {
+      setError(`Please check all fields are filled correctly.`);
+      setErrors(allErrors);
+      return false;
     }
     return true;
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep((prev) => prev + 1);
+      setErrors({});
+    }
   };
 
   const handleProcessPDF = async (e: React.FormEvent) => {
@@ -60,7 +75,7 @@ export default function Page() {
     setError(null);
     setPdfUrl(null);
 
-    if (!validateAllSteps()) {
+    if (!validateAll()) {
       setStatus("error");
       return;
     }
@@ -100,12 +115,6 @@ export default function Page() {
     }
   };
 
-  const handleNext = () => {
-    if (validateStep(currentStep, formData)) {
-      setCurrentStep((prev) => prev + 1);
-    }
-  };
-
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -113,20 +122,14 @@ export default function Page() {
           <TradingDetailsStep
             formData={formData}
             onInputChange={handleInputChange}
+            errors={errors}
           />
         );
       case 2:
         return (
-          <PeriodDetailsStep
+          <DutyDetailsStep
             formData={formData}
-            onInputChange={handleInputChange}
-          />
-        );
-      case 3:
-        return (
-          <PersonalDetailsStep
-            formData={formData}
-            onInputChange={handleInputChange}
+            onInputChange={(name, value: unknown) => handleInputChange(name, value)}
           />
         );
       default:
@@ -135,24 +138,23 @@ export default function Page() {
   };
 
   return (
-    <div className="guest-form-grid">
-      <Card>
-        <h2>Guest Return Form - Step {currentStep}</h2>
-        <form onSubmit={handleProcessPDF}>
-          {renderStep()}
-          {error && <p>{error}</p>}
+    <div className="guest-form-wrapper">
+      <form className="guest-form-flex" onSubmit={handleProcessPDF}>
+        {renderStep()}
+        {error && <p>{error}</p>}
 
-          {status === "success" && pdfUrl && <PDFPreview pdfUrl={pdfUrl} />}
+        {status === "success" && pdfUrl && <PDFPreview pdfUrl={pdfUrl} />}
 
-          {currentStep < 3 ? (
-            <button type="button" onClick={handleNext}>
-              Next
-            </button>
-          ) : (
-            <button type="submit">Submit</button>
-          )}
-        </form>
-      </Card>
+        {currentStep < 3 ? (
+          <button className="form-button" type="button" onClick={handleNext}>
+            Next
+          </button>
+        ) : (
+          <button className="form-button" type="submit">
+            Submit
+          </button>
+        )}
+      </form>
     </div>
   );
 }

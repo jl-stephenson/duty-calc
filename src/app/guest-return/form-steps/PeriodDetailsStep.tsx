@@ -1,49 +1,13 @@
-"use client";
-
 import { FormData } from "../../../lib/types/guest-return-form";
 import { DateInputGroup } from "../../../components/DateInputGroup";
-import { useState } from "react";
-import { getValidationError } from "../../../lib/utils/guest-form-validation";
 
-type StepProps = {
+type PeriodDetailsStepProps = {
   formData: FormData;
   onInputChange: (name: keyof FormData, value: string) => void;
+  errors?: Partial<Record<keyof FormData, string>>;
 };
 
-interface DateErrors {
-  periodFrom: string;
-  periodTo: string;
-}
-
-export function PeriodDetailsStep({ formData, onInputChange }: StepProps) {
-  const [dateErrors, setDateErrors] = useState<DateErrors>({
-    periodFrom: "",
-    periodTo: "",
-  });
-
-  const handleDateChange =
-    (field: "periodFrom" | "periodTo") => (value: string) => {
-      onInputChange(field, value);
-
-      const error = getValidationError(field, value);
-      setDateErrors((prev) => ({
-        ...prev,
-        [field]: error || "",
-      }));
-
-      if (field === "periodTo" && formData.periodFrom && value) {
-        const rangeError = getValidationError("dateRange", [
-          formData.periodFrom,
-          value,
-        ]);
-        if (rangeError) {
-          setDateErrors((prev) => ({
-            ...prev,
-            periodTo: rangeError,
-          }));
-        }
-      }
-    };
+export function PeriodDetailsStep({ formData, onInputChange, errors = {}, }: PeriodDetailsStepProps) {
 
   return (
     <div>
@@ -51,27 +15,17 @@ export function PeriodDetailsStep({ formData, onInputChange }: StepProps) {
         label="Period From"
         id="period-from"
         value={formData.periodFrom}
-        onChange={handleDateChange("periodFrom")}
-        error={dateErrors.periodFrom}
+        onInputChange={(value) => onInputChange("periodFrom", value)}
+        error={errors.periodFrom}
       />
 
       <DateInputGroup
         label="Period To"
         id="period-to"
         value={formData.periodTo}
-        onChange={handleDateChange("periodTo")}
-        error={dateErrors.periodTo}
+        onInputChange={(value) => onInputChange("periodTo", value)}
+        error={errors.periodTo}
       />
-      <div>
-        <label htmlFor="urn">URN</label>
-        <input
-          type="text"
-          id="urn"
-          name="urn"
-          value={formData.urn}
-          onChange={(e) => onInputChange("urn", e.target.value)}
-        />
-      </div>
     </div>
   );
 }

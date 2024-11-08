@@ -6,10 +6,48 @@ import tempfile
 from pypdf import PdfReader, PdfWriter
 import logging
 from datetime import datetime
+import yaml
+from typing import Dict, Any
+from dotenv import load_dotenv
+
+load_dotenv('.env.local')
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+logging.info(f"Environment: {os.getenv('ENVIRONMENT')}")
+
 firebase_admin.initialize_app()
+
+async def load_duty_rates() -> Dict[str, Any]:
+    try:
+
+        if os.getenv('ENVIRONMENT') == 'production':
+            bucket = storage.bucket()
+            blob = bucket.blob('config/duty_rates.yaml')
+
+            _, temp_local_filename = tempfile.mkstemp()
+
+            with open(temp_local_filename, 'r') as f:
+                config = yaml.safe_load(f)
+
+            os.remove(temp_local_filename)
+
+        else:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.dirname(current_dir)
+            config_path = os.path.join(project_root, 'duty_rates.yaml')
+
+            logging.info(f"Loading duty rates from {config_path}")
+
+            with open(config_path, 'r') as f:
+                config = yaml.safe_load(f)
+        
+            return config
+    
+    except Exception as e:
+        logging.error(f"Error loading duty rates: {str(e)}")
+        raise
+
 
 def generate_unique_filename():
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')

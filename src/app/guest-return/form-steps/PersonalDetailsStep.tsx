@@ -3,12 +3,13 @@ import { FormData } from "../../../lib/types/guest-return-form";
 type StepProps = {
   formData: FormData;
   onInputChange: (name: keyof FormData, value: string) => void;
+  errors: Partial<Record<keyof FormData, string>>;
 };
 
-export function PersonalDetailsStep({ formData, onInputChange }: StepProps) {
+export function PersonalDetailsStep({ formData, onInputChange, errors }: StepProps) {
   return (
     <div>
-      <div>
+      <div className="form-field">
         <label htmlFor="fullName">Full Name</label>
         <input
           type="text"
@@ -18,8 +19,9 @@ export function PersonalDetailsStep({ formData, onInputChange }: StepProps) {
           onChange={(e) => onInputChange("fullName", e.target.value)}
           required
         />
+        {errors.fullName && <p className="form-error">{errors.fullName}</p>}
       </div>
-      <div>
+      <div className="form-field">
         <label htmlFor="capacity">Capacity</label>
         <input
           type="text"
@@ -29,6 +31,7 @@ export function PersonalDetailsStep({ formData, onInputChange }: StepProps) {
           onChange={(e) => onInputChange("capacity", e.target.value)}
           required
         />
+        {errors.capacity && <p className="form-error">{errors.capacity}</p>}
       </div>
     </div>
   );

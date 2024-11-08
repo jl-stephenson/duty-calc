@@ -1,110 +1,191 @@
 import { FormData } from "../types/guest-return-form";
+import { validateDate } from "./date-validation";
 
+export const ERROR_MESSAGES = {
+  tradingName: {
+    required: "Trading name is required",
+    length: "Must be 2 - 100 characters",
+  },
+  tradingAddress: {
+    required: "Trading address is required",
+    length: "Must be  5 - 200 characters",
+  },
+  postcode: {
+    required: "Postcode is required",
+    format: "Please enter a valid UK postcode",
+  },
+  periodFrom: {
+    required: "Start date is required",
+  },
+  periodTo: {
+    required: "End date is required",
+    range: "End date must be after start date",
+  },
+  urn: {
+    required: "URN is required",
+    format: "URN must be a 12 digit number",
+  },
+  fullName: {
+    required: "Full name is required",
+    length: "Must be 2 - 100 characters",
+    format: "Must only contain letters and punctuation",
+  },
+  capacity: {
+    required: "Capacity is required",
+  },
+} as const;
 
-function isValidDate(dateStr: string): boolean {
-  // Check format
-  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-    return false;
+const validateTradingDetails = (
+  data: Pick<
+    FormData,
+    | "tradingName"
+    | "tradingAddress0"
+    | "tradingAddress1"
+    | "postcode"
+    | "urn"
+    | "fullName"
+    | "capacity"
+    | "periodFrom"
+    | "periodTo"
+  >
+) => {
+  const errors: Partial<Record<keyof typeof data, string>> = {};
+
+  if (!data.tradingName) {
+    errors.tradingName = ERROR_MESSAGES.tradingName.required;
+  } else if (data.tradingName.length < 2 || data.tradingName.length > 100) {
+    errors.tradingName = ERROR_MESSAGES.tradingName.length;
   }
 
-  const [day, month, year] = dateStr.split("/").map(Number);
-
-  // Check year is reasonable (e.g., between 2000 and 2100)
-  if (year < 2000 || year > 2100) {
-    return false;
+  if (!data.tradingAddress0) {
+    errors.tradingAddress0 = ERROR_MESSAGES.tradingAddress.required;
+  } else if (
+    data.tradingAddress0.length < 5 ||
+    data.tradingAddress0.length > 200
+  ) {
+    errors.tradingAddress0 = ERROR_MESSAGES.tradingAddress.length;
   }
 
-  // Check month is valid
-  if (month < 1 || month > 12) {
-    return false;
+  if (!data.postcode) {
+    errors.postcode = ERROR_MESSAGES.postcode.required;
+  } else if (!/^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i.test(data.postcode)) {
+    errors.postcode = ERROR_MESSAGES.postcode.format;
   }
 
-  // Check day is valid for the given month
-  const daysInMonth = new Date(year, month, 0).getDate();
-  if (day < 1 || day > daysInMonth) {
-    return false;
+  if (!data.urn) {
+    errors.urn = ERROR_MESSAGES.urn.required;
+  } else if (!/^\d{12}$/.test(data.urn)) {
+    errors.urn = ERROR_MESSAGES.urn.format;
   }
 
-  return true;
-}
-
-function areDatesInOrder(fromDate: string, toDate: string): boolean {
-  if (!isValidDate(fromDate) || !isValidDate(toDate)) {
-    return false;
+  if (!data.fullName) {
+    errors.fullName = ERROR_MESSAGES.fullName.required;
+  } else if (data.fullName.length < 2 || data.fullName.length > 100) {
+    errors.fullName = ERROR_MESSAGES.fullName.length;
+  } else if (!/^[a-zA-Z\s\-'.]+$/.test(data.fullName)) {
+    errors.fullName = ERROR_MESSAGES.fullName.format;
   }
 
-  const [fromDay, fromMonth, fromYear] = fromDate.split("/").map(Number);
-  const [toDay, toMonth, toYear] = toDate.split("/").map(Number);
-
-  const from = new Date(fromYear, fromMonth - 1, fromDay);
-  const to = new Date(toYear, toMonth - 1, toDay);
-
-  return from <= to;
-}
-
-function isValidUrn(urn: string): boolean {
-  return /^\d{12}$/.test(urn);
-}
-
-export function validateStep(step: number, formData: FormData): boolean {
-  switch (step) {
-    case 1:
-      return Boolean(
-        formData.tradingName && formData.tradingAddress0 && formData.postcode
-      );
-    case 2:
-      if (!formData.periodFrom || !formData.periodTo || !formData.urn) {
-        return false;
-      }
-      if (!isValidUrn(formData.urn)) {
-        return false;
-      }
-
-      return (
-        isValidDate(formData.periodFrom) &&
-        isValidDate(formData.periodTo) &&
-        areDatesInOrder(formData.periodFrom, formData.periodTo)
-      );
-    case 3:
-      return Boolean(formData.fullName && formData.capacity);
-    default:
-      return true;
+  if (!data.capacity) {
+    errors.capacity = ERROR_MESSAGES.capacity.required;
   }
-}
 
-export const fieldValidators = {
-  periodFrom: (value: string) => isValidDate(value),
-  periodTo: (value: string) => isValidDate(value),
-  urn: (value: string) => isValidUrn(value),
-  dateRange: (from: string, to: string) => areDatesInOrder(from, to),
+  const periodFromError = validateDate(data.periodFrom);
+  if (periodFromError) {
+    errors.periodFrom = periodFromError;
+  }
+
+  const periodToError = validateDate(data.periodTo);
+  if (periodToError) {
+    errors.periodTo = periodToError;
+  }
+
+  if (!errors.periodFrom && !errors.periodTo) {
+    const [fromDay, fromMonth, fromYear] = data.periodFrom
+      .split("/")
+      .map(Number);
+    const [toDay, toMonth, toYear] = data.periodTo.split("/").map(Number);
+
+    const fromDate = new Date(fromYear, fromMonth - 1, fromDay);
+    const toDate = new Date(toYear, toMonth - 1, toDay);
+
+    if (fromDate >= toDate) {
+      errors.periodTo = ERROR_MESSAGES.periodTo.range;
+    }
+  }
+
+  return errors;
 };
 
-// Helper function to get specific validation error messages
-export function getValidationError(
-  field: keyof FormData | "dateRange",
-  value: string | string[]
-): string | null {
-  switch (field) {
-    case "periodFrom":
-    case "periodTo":
-      if (!value) return "Date is required";
-      if (!isValidDate(value as string))
-        return "Please enter a valid date in DD/MM/YYYY format";
-      return null;
+// const validatePeriodDetails = (
+//   data: Pick<FormData, "periodFrom" | "periodTo" | "urn">
+// ) => {
+//   const errors: Partial<Record<keyof typeof data, string>> = {};
 
-    case "urn":
-      if (!value) return "URN is required";
-      if (!isValidUrn(value as string)) return "URN must be exactly 12 digits";
-      return null;
+//   const periodFromError = validateDate(data.periodFrom);
+//   if (periodFromError) {
+//     errors.periodFrom = periodFromError;
+//   }
 
-    case "dateRange": {
-      const [from, to] = value as string[];
-      if (!areDatesInOrder(from, to))
-        return "Period From must be before or equal to Period To";
-      return null;
-    }
+//   const periodToError = validateDate(data.periodTo);
+//   if (periodToError) {
+//     errors.periodTo = periodToError;
+//   }
 
+//   if (!errors.periodFrom && !errors.periodTo) {
+//     const [fromDay, fromMonth, fromYear] = data.periodFrom
+//       .split("/")
+//       .map(Number);
+//     const [toDay, toMonth, toYear] = data.periodTo.split("/").map(Number);
+
+//     const fromDate = new Date(fromYear, fromMonth - 1, fromDay);
+//     const toDate = new Date(toYear, toMonth - 1, toDay);
+
+//     if (fromDate >= toDate) {
+//       errors.periodTo = ERROR_MESSAGES.periodTo.range;
+//     }
+//   }
+
+//   if (!data.urn) {
+//     errors.urn = ERROR_MESSAGES.urn.required;
+//   } else if (!/^\d{12}$/.test(data.urn)) {
+//     errors.urn = ERROR_MESSAGES.urn.format;
+//   }
+
+//   return errors;
+// };
+
+// const validatePersonalDetails = (
+//   data: Pick<FormData, "fullName" | "capacity">
+// ) => {
+//   const errors: Partial<Record<keyof typeof data, string>> = {};
+
+//   if (!data.fullName) {
+//     errors.fullName = ERROR_MESSAGES.fullName.required;
+//   } else if (data.fullName.length < 2 || data.fullName.length > 100) {
+//     errors.fullName = ERROR_MESSAGES.fullName.length;
+//   } else if (!/^[a-zA-Z\s\-'.]+$/.test(data.fullName)) {
+//     errors.fullName = ERROR_MESSAGES.fullName.format;
+//   }
+
+//   if (!data.capacity) {
+//     errors.capacity = ERROR_MESSAGES.capacity.required;
+//   }
+
+//   return errors;
+// };
+
+export const validateFormStep = (step: number, formData: FormData) => {
+  switch (step) {
+    case 1:
+      return validateTradingDetails(formData);
     default:
-      return null;
+      return {};
   }
-}
+};
+
+export const validateAllSteps = (formData: FormData) => {
+  return {
+    ...validateTradingDetails(formData),
+  };
+};
