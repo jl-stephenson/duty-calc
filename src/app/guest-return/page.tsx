@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FormData,
   ProcessPDFResponse,
@@ -11,7 +11,10 @@ import {
 import { TradingDetailsStep } from "./form-steps/TradingDetailsStep";
 import { httpsCallable } from "firebase/functions";
 import { PDFPreview } from "./form-steps/PDFPreview";
-import { getFirebaseFunctions } from "../../lib/firebase/clientApp";
+import {
+  initAnonymousAuth,
+  getFirebaseFunctions,
+} from "../../lib/firebase/clientApp";
 import { DutyDetailsStep } from "./form-steps/DutyDetailsStep";
 
 const INITIAL_FORM_DATA: FormData = {
@@ -30,7 +33,7 @@ const INITIAL_FORM_DATA: FormData = {
 
 export default function Page() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [error, setError] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
@@ -39,6 +42,10 @@ export default function Page() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>(
     {}
   );
+
+  useEffect(() => {
+    initAnonymousAuth();
+  }, []);
 
   const handleInputChange = (name: keyof FormData, value: unknown) => {
     setFormData((prev) => ({
@@ -56,7 +63,7 @@ export default function Page() {
   const validateAll = (): boolean => {
     const allErrors = validateAllSteps(formData);
     if (Object.keys(allErrors).length > 0) {
-      setError(`Please check all fields are filled correctly.`);
+      // setError(`Please check all fields are filled correctly.`);
       setErrors(allErrors);
       return false;
     }
@@ -72,7 +79,7 @@ export default function Page() {
 
   const handleProcessPDF = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    // setError(null);
     setPdfUrl(null);
 
     if (!validateAll()) {
@@ -108,9 +115,9 @@ export default function Page() {
       }
     } catch (error) {
       console.error("Error calling function", error);
-      setError(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      // setError(
+      //   error instanceof Error ? error.message : "An unexpected error occurred"
+      // );
       setStatus("error");
     }
   };
@@ -129,7 +136,9 @@ export default function Page() {
         return (
           <DutyDetailsStep
             formData={formData}
-            onInputChange={(name, value: unknown) => handleInputChange(name, value)}
+            onInputChange={(name, value: unknown) =>
+              handleInputChange(name, value)
+            }
           />
         );
       default:
@@ -139,22 +148,32 @@ export default function Page() {
 
   return (
     <div className="guest-form-wrapper">
-      <form className="guest-form-flex" onSubmit={handleProcessPDF}>
-        {renderStep()}
-        {error && <p>{error}</p>}
+      {currentStep < 2 ? (
+        <div className="guest-form-flex">
+          {renderStep()}
+          {/* {error && <p>{error}</p>} */}
 
-        {status === "success" && pdfUrl && <PDFPreview pdfUrl={pdfUrl} />}
-
-        {currentStep < 3 ? (
-          <button className="form-button" type="button" onClick={handleNext}>
+          <button
+            className="form-button"
+            type="button"
+            onClick={handleNext}
+            aria-label="Go to next step"
+          >
             Next
           </button>
-        ) : (
-          <button className="form-button" type="submit">
+        </div>
+      ) : (
+        <form className="guest-form-flex" onSubmit={handleProcessPDF}>
+          {renderStep()}
+          {/* {error && <p>{error}</p>} */}
+
+          {status === "success" && pdfUrl && <PDFPreview pdfUrl={pdfUrl} />}
+
+          <button className="form-button" type="submit" aria-label="Submit form">
             Submit
           </button>
-        )}
-      </form>
+        </form>
+      )}
     </div>
   );
 }

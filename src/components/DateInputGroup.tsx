@@ -11,7 +11,10 @@ export function DateInputGroup({
   onInputChange,
   error,
 }: DateInputGroupProps) {
-  const [day, month, year] = value?.split("/") || ["", "", ""];
+  const parts = value ? value.split("/") : [];
+  const day = parts[0] || "";
+  const month = parts[1] || "";
+  const year = parts[2] || "";
 
   const handleDatePartChange = useCallback(
     (part: DatePart, inputValue: string) => {

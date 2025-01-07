@@ -29,4 +29,162 @@ duty_rates:
         min_abv: 22.1
         max_abv: 40.0
 
-        
+    draught:
+      very_low:
+        code: "353"
+        description: "Wine less than 3.5% ABV and eligible for Draught Relief"
+        rate_per_litre_alcohol: 8.42
+        min_abv: 1.2
+        max_abv: 3.4
+
+      low:
+        code: "358"
+        description: "Wine at least 3.5% ABV but less than 8.5% ABV and eligible for Draught Relief"
+        rate_per_litre_alcohol: 19.08
+        min_abv: 3.5
+        max_abv: 8.4
+
+    small_producer:
+      very_low:
+        code: "363"
+        description: "Wine less than 3.5% ABV and eligible for Small Producer Relief"
+        min_abv: 1.2
+        max_abv: 3.4
+
+      low:
+        code: "368"
+        description: "Wine at least 3.5% ABV but less than 8.5% ABV and eligible for Small Producer Relief"
+        min_abv: 3.5
+        max_abv: 8.49
+
+    small_producer_and_draught:
+      very_low:
+        code: "373"
+        description: "Wine less than 3.5% ABV and eligible for Small Producer Relief and Draught Relief"
+        min_abv: 1.2
+        max_abv: 3.4
+
+      low:
+        code: "378"
+        description: "Wine at least 3.5% ABV but less than 8.5% ABV and eligible for Small Producer Relief and Draught Relief"
+        min_abv: 3.5
+        max_abv: 8.49
+
+  cider:
+    standard:
+      still:
+        very_low:
+          code: "301"
+          description: "Still cider less than 1.2%"
+          rate_per_litre_alcohol: 0.0
+          min_abv: 0.0
+          max_abv: 1.2
+
+        low:
+          code: "312"
+          description: "Still cider at least 1.2% ABV but less than 3.5% ABV"
+          rate_per_litre_alcohol: 9.27
+          min_abv: 1.3
+          max_abv: 3.4
+
+        medium:
+          code: "322"
+          description: "Still cider at least 3.5% ABV but less than 8.5%"
+          rate_per_litre_alcohol: 9.67
+          min_abv: 3.5
+          max_abv: 8.4
+
+        high:
+          code: "334"
+          description: "Still cider - Other fermented products at least 8.5% ABV but not exceeding 22% ABV"
+          rate_per_litre_alcohol: 28.50
+          min_abv: 8.5
+          max_abv: 22.0
+
+        very_high:
+          code: "344"
+          description: "Still cider - Other femented products exceeding 22% ABV"
+          rate_per_litre_alcohol: 31.64
+          min_abv: 22.1
+          max_abv: 40.0
+
+      sparkling:
+        very_low:
+          code: "301"
+          description: "Sparkling cider less than 1.2%"
+          rate_per_litre_alcohol: 0.0
+          min_abv: 0.0
+          max_abv: 1.2
+
+        low:
+          code: "312"
+          description: "Sparkling cider at least 1.2% ABV but less than 3.5% ABV"
+          rate_per_litre_alcohol: 9.27
+          min_abv: 1.3
+          max_abv: 3.4
+
+        medium:
+          code: "322"
+          description: "Sparkling cider at least 3.5% ABV not exceeding 5.5% ABV"
+          rate_per_litre_alcohol: 9.67
+          min_abv: 3.5
+          max_abv: 5.5
+
+        high:
+          code: "359"
+          description: "Sparkling cider exceeding 5.5% ABV but less than 8.5% ABV"
+          rate_per_litre_alcohol: 24.77
+          min_abv: 5.6
+          max_abv: 8.4
+
+        very_high:
+          code: "334"
+          description: "Sparkling cider - Other fermented products at least 8.5% ABV but not exceeding 22% ABV"
+          rate_per_litre_alcohol: 28.50
+          min_abv: 8.5
+          max_abv: 22.0
+
+        extremely_high:
+          code: "344"
+          description: "Sparkling cider - Other fermented products exceeding 22% ABV"
+          rate_per_litre_alcohol: 31.64
+          min_abv: 22.1
+          max_abv: 40.0
+
+    draught:
+      still:
+        low:
+          code: "352"
+          description: "Still cider less than 3.5% and eligible for Draught Relief"
+          rate_per_litre_alcohol: 8.42
+          min_abv: 1.2
+          max_abv: 3.4
+
+        medium:
+          code: "357"
+          description: "Still cider at least 3.5% ABV but less than 8.5% ABV and eligible for Draught Relief"
+          rate_per_litre_alcohol: 8.78
+          min_abv: 3.5
+          max_abv: 8.4
+
+      sparkling:
+        low:
+          code: "352"
+          description: "Sparkling cider less than 3.5% ABV and eligible for Draught Relief"
+          rate_per_litre_alcohol: 8.42
+          min_abv: 1.2
+          max_abv: 3.4
+
+        medium:
+          code: "357"
+          description: "Sparkling cider at least 3.5% but less than 5.5% and eligible for Draught Relief"
+          rate_per_litre_alcohol: 8.78
+          min_abv: 3.5
+          max_abv: 5.5
+
+        high:
+          code: "359"
+          description: "Sparkling cider exceeding 5.5% ABV but less than 8.5% ABV and eligible for Draught Relief"
+          rate_per_litre_alcohol: 19.08
+          min_abv: 5.6
+          max_abv: 8.4

@@ -9,6 +9,7 @@ from datetime import datetime
 import yaml
 from typing import Dict, Any
 from dotenv import load_dotenv
+import math
 
 load_dotenv('.env.local')
 
@@ -18,7 +19,7 @@ logging.info(f"Environment: {os.getenv('ENVIRONMENT')}")
 
 firebase_admin.initialize_app()
 
-async def load_duty_rates() -> Dict[str, Any]:
+def load_duty_rates() -> Dict[str, Any]:
     try:
 
         if os.getenv('ENVIRONMENT') == 'production':
@@ -27,10 +28,14 @@ async def load_duty_rates() -> Dict[str, Any]:
 
             _, temp_local_filename = tempfile.mkstemp()
 
+            blob.download_to_filename(temp_local_filename)
+
             with open(temp_local_filename, 'r') as f:
                 config = yaml.safe_load(f)
 
             os.remove(temp_local_filename)
+
+            return config 
 
         else:
             current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -48,6 +53,55 @@ async def load_duty_rates() -> Dict[str, Any]:
         logging.error(f"Error loading duty rates: {str(e)}")
         raise
 
+def calculate_duty(wine_entry: dict, duty_rates: dict, row_index: int) -> dict:
+    abv = float(wine_entry['abv'])
+
+    matching_rate = None
+
+    wine_rates = duty_rates['duty_rates']['wine']['standard']
+
+    for rate_type, rate_info in wine_rates.items():
+        if rate_info['min_abv'] <= abv <= rate_info['max_abv']:
+            matching_rate = rate_info
+            break
+
+    if not matching_rate:
+        logging.error(f"No matching duty rate found for ABV: {abv}")
+        return None
+    
+    total_sold = (wine_entry['containerSize'] * wine_entry['unitsSold']) / 1000
+    total_pure_alcohol = total_sold * (abv / 100)
+    duty_rate = matching_rate['rate_per_litre_alcohol']
+    total_duty = total_pure_alcohol * duty_rate
+
+    abv_formatted = f"{abv:.1f}"
+    duty_rate_formatted = f"{duty_rate:.2f}"
+    total_duty_formatted = f"{math.floor(total_duty * 100) / 100:.2f}"
+
+    tax_code = matching_rate['code']
+    result = {}
+
+    for i, digit in enumerate(tax_code):
+        result[f"Row{row_index}_TC{i}"] = digit
+
+    result[f"Row{row_index}_Quantity"] = str(total_sold)
+
+    abv_reversed = list(abv_formatted.replace(".", ""))
+    abv_reversed.reverse()
+    for i, digit in enumerate(abv_reversed):
+        result[f"Row{row_index}_ABV{i}"] = digit
+
+    duty_rate_reversed = list(duty_rate_formatted.replace(".", ""))
+    duty_rate_reversed.reverse()
+    for i, digit in enumerate(duty_rate_reversed):
+        result[f"Row{row_index}_DR{i}"] = digit  
+
+    total_duty_reversed = list(total_duty_formatted.replace(".", ""))
+    total_duty_reversed.reverse()
+    for i, digit in enumerate(total_duty_reversed):
+        result[f"Row{row_index}_ED{i}"] = digit
+
+    return result 
 
 def generate_unique_filename():
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -123,13 +177,41 @@ def create_date_field_mapping(date_str: str, field_prefix: str) -> dict:
 @https_fn.on_call()
 def process_pdf(req):
     try:
+        if not context.auth:
+            return {
+                "status": "error",
+                "error": "Authentication required."
+            }
+        
+        uid = context.auth.uid
+
         logging.info(f"Received request data: {req.data}")
         
         form_data_from_request = req.data if req.data else {}
 
+        required_fields = ['tradingName', 'urn', 'periodFrom', 'periodTo', 'wineEntries']
+        missing_fields = [field for field in required_fields if not form_data_from_request.get(field)]
+        
+        if missing_fields:
+            return {
+                "status": "error",
+                "error": f"Missing required fields: {', '.join(missing_fields)}",
+            }
+        
+
+        try:
+            duty_rates = load_duty_rates()
+        except Exception as e:
+            logging.error(f"Error loading duty rates: {str(e)}")
+            return {
+                "status": "error",
+                "error": "Failed to load duty rates"
+            }
+
         urn = form_data_from_request.get('urn', '')
         period_from = form_data_from_request.get('periodFrom', '')
         period_to = form_data_from_request.get('periodTo', '')
+        wine_entries = form_data_from_request.get('wineEntries', [])
 
         submission_date = get_current_date_formatted()
 
@@ -153,6 +235,11 @@ def process_pdf(req):
                 submission_date,
                 'SubmitDate_'
             )
+
+            for i, entry in enumerate(wine_entries):
+                duty_calculations = calculate_duty(entry, duty_rates, i)
+                if duty_calculations:
+                    pdf_form_data.update(duty_calculations)
 
             pdf_form_data.update(period_from_mappings)
             pdf_form_data.update(period_to_mappings)
