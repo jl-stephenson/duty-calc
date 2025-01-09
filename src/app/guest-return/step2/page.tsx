@@ -3,6 +3,7 @@ import { StepForm } from "../../../components/StepForm";
 import { DutyDetailsStep } from "../form-steps/DutyDetailsStep";
 
 export default function Step2Page() {
+
   return (
     <StepForm
       stepNumber={2}

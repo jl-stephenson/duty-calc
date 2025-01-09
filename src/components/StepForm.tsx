@@ -46,17 +46,17 @@ export const StepForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form noValidate={true} onSubmit={handleSubmit}>
       {children({ formData, handleInputChange, errors })}
       <div className="nav-buttons">
+        <button className="form-button form-button--next" type="submit">
+          Next
+        </button>
         {previousRoute && (
-          <button type="button" onClick={() => router.push(previousRoute)}>
+          <button className="form-button form-button--back" type="button" onClick={() => router.push(previousRoute)}>
             Back
           </button>
         )}
-        <button className="form-button" type="submit">
-          Next
-        </button>
       </div>
     </form>
   );
