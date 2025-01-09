@@ -177,13 +177,13 @@ def create_date_field_mapping(date_str: str, field_prefix: str) -> dict:
 @https_fn.on_call()
 def process_pdf(req):
     try:
-        if not context.auth:
+        if not req.auth:
             return {
                 "status": "error",
                 "error": "Authentication required."
             }
         
-        uid = context.auth.uid
+        uid = req.auth.uid
 
         logging.info(f"Received request data: {req.data}")
         

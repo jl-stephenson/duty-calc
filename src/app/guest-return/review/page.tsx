@@ -53,7 +53,7 @@ export default function ReviewPage() {
       if (data.status === "success" && data.url) {
         setStatus("success");
         router.push(
-          `/gues-return/pdf-preview?pdfUrl=${encodeURIComponent(data.url)}`
+          `/guest-return/pdf-preview?pdfUrl=${encodeURIComponent(data.url)}`
         );
       } else if (data.error) {
         throw new Error(
