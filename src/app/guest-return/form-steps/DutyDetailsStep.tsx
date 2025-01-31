@@ -1,7 +1,7 @@
 import React from "react";
 import { WineEntry, FormData } from "../../../lib/types/guest-return-form";
 import { CloseSvg } from "../../../components/button-svgs/CloseSvg";
-import { PlusSvg } from "../../../components/button-svgs/PlusSVG";
+import { PlusSvg } from "../../../components/button-svgs/PlusSvg";
 
 interface DutyDetailsStepProps {
   formData: FormData;
@@ -54,9 +54,11 @@ export const DutyDetailsStep: React.FC<DutyDetailsStepProps> = ({
       {formData.wineEntries.map((entry, index) => (
         <div key={index} className="duty-form-field">
           <div>
-            <label className="duty-label" htmlFor="Type">Type</label>
+            <label className="duty-label" htmlFor="Type">
+              Type
+            </label>
             <select
-            className="duty-select"
+              className="duty-select"
               name="Type"
               id="Type"
               value={entry.type}
@@ -67,7 +69,9 @@ export const DutyDetailsStep: React.FC<DutyDetailsStepProps> = ({
             </select>
           </div>
           <div>
-            <label className="duty-label" htmlFor="abv">ABV (%)</label>
+            <label className="duty-label" htmlFor="abv">
+              ABV (%)
+            </label>
             <input
               className="form-text-input"
               type="number"
@@ -79,9 +83,11 @@ export const DutyDetailsStep: React.FC<DutyDetailsStepProps> = ({
             />
           </div>
           <div>
-            <label className="duty-label" htmlFor="Style">Style</label>
+            <label className="duty-label" htmlFor="Style">
+              Style
+            </label>
             <select
-            className="duty-select"
+              className="duty-select"
               name="Style"
               id="Style"
               value={entry.style}
@@ -94,7 +100,9 @@ export const DutyDetailsStep: React.FC<DutyDetailsStepProps> = ({
             </select>
           </div>
           <div>
-            <label className="duty-label" htmlFor="Units">Units Sold</label>
+            <label className="duty-label" htmlFor="Units">
+              Units Sold
+            </label>
             <input
               className="form-text-input"
               type="text"
@@ -106,7 +114,9 @@ export const DutyDetailsStep: React.FC<DutyDetailsStepProps> = ({
             />
           </div>
           <div>
-            <label className="duty-label" htmlFor="Container">Container (ml)</label>
+            <label className="duty-label" htmlFor="Container">
+              Container (ml)
+            </label>
             <input
               className="form-text-input"
               type="text"
@@ -116,24 +126,35 @@ export const DutyDetailsStep: React.FC<DutyDetailsStepProps> = ({
                 handleEntryChange(index, "containerSize", e.target.value)
               }
             />
-           
           </div>
-          <button className="duty-entry-button duty-entry-button--remove" type="button" onClick={() => handleRemoveEntry(index)}>
-              <CloseSvg />
-              <span className="visually-hidden">Remove Entry</span>
-            </button>
+          <button
+            className="duty-entry-button duty-entry-button--remove"
+            type="button"
+            onClick={() => handleRemoveEntry(index)}
+          >
+            <CloseSvg />
+            <span className="visually-hidden">Remove Entry</span>
+          </button>
         </div>
       ))}
 
       {formData.wineEntries.length < 11 && (
-        <button className="duty-entry-button duty-entry-button--add" type="button" onClick={handleAddEntry}>
+        <button
+          className="duty-entry-button duty-entry-button--add"
+          type="button"
+          onClick={handleAddEntry}
+        >
           <PlusSvg />
           <span className="visually-hidden">Add Entry</span>
         </button>
       )}
 
       {formData.wineEntries.length === 0 && (
-        <p className="duty-entry-instructions">No entries yet. Click the 'Plus' button to add one. If you would like to submit a zero duty return, or only submit under and/or overdeclations please click 'Next'.</p>
+        <p className="duty-entry-instructions">
+          No entries yet. Click the 'Plus' button to add one. If you would like
+          to submit a zero duty return, or only submit under and/or
+          overdeclations please click 'Next'.
+        </p>
       )}
     </div>
   );

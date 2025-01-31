@@ -1,4 +1,3 @@
-import React from "react";
 import Card from "../../ui/card";
 import LinkButton from "../../ui/link-button";
 
@@ -11,7 +10,7 @@ const Dashboard = () => {
         <LinkButton
           label="Generate return"
           type="accent"
-          url="../guest-return"
+          url="../guest-return/step1"
         />
       </Card>
       <Card>

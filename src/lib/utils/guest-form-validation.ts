@@ -35,7 +35,7 @@ export const ERROR_MESSAGES = {
   },
 } as const;
 
-const validateTradingDetails = (
+export const validateTradingDetails = (
   data: Pick<
     FormData,
     | "tradingName"
@@ -116,64 +116,6 @@ const validateTradingDetails = (
 
   return errors;
 };
-
-// const validatePeriodDetails = (
-//   data: Pick<FormData, "periodFrom" | "periodTo" | "urn">
-// ) => {
-//   const errors: Partial<Record<keyof typeof data, string>> = {};
-
-//   const periodFromError = validateDate(data.periodFrom);
-//   if (periodFromError) {
-//     errors.periodFrom = periodFromError;
-//   }
-
-//   const periodToError = validateDate(data.periodTo);
-//   if (periodToError) {
-//     errors.periodTo = periodToError;
-//   }
-
-//   if (!errors.periodFrom && !errors.periodTo) {
-//     const [fromDay, fromMonth, fromYear] = data.periodFrom
-//       .split("/")
-//       .map(Number);
-//     const [toDay, toMonth, toYear] = data.periodTo.split("/").map(Number);
-
-//     const fromDate = new Date(fromYear, fromMonth - 1, fromDay);
-//     const toDate = new Date(toYear, toMonth - 1, toDay);
-
-//     if (fromDate >= toDate) {
-//       errors.periodTo = ERROR_MESSAGES.periodTo.range;
-//     }
-//   }
-
-//   if (!data.urn) {
-//     errors.urn = ERROR_MESSAGES.urn.required;
-//   } else if (!/^\d{12}$/.test(data.urn)) {
-//     errors.urn = ERROR_MESSAGES.urn.format;
-//   }
-
-//   return errors;
-// };
-
-// const validatePersonalDetails = (
-//   data: Pick<FormData, "fullName" | "capacity">
-// ) => {
-//   const errors: Partial<Record<keyof typeof data, string>> = {};
-
-//   if (!data.fullName) {
-//     errors.fullName = ERROR_MESSAGES.fullName.required;
-//   } else if (data.fullName.length < 2 || data.fullName.length > 100) {
-//     errors.fullName = ERROR_MESSAGES.fullName.length;
-//   } else if (!/^[a-zA-Z\s\-'.]+$/.test(data.fullName)) {
-//     errors.fullName = ERROR_MESSAGES.fullName.format;
-//   }
-
-//   if (!data.capacity) {
-//     errors.capacity = ERROR_MESSAGES.capacity.required;
-//   }
-
-//   return errors;
-// };
 
 export const validateFormStep = (step: number, formData: FormData) => {
   switch (step) {

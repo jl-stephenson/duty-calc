@@ -40,3 +40,5 @@ functions/share/
 functions/__pycache__/
 
 path.py
+
+coverage/
